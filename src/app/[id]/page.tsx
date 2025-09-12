@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Calendar, User, Tag, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Calendar, User, Tag, ChevronDown, ChevronUp, Video, AlertCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 interface Material {
@@ -22,6 +22,26 @@ export default function MaterialDetailPage() {
   const [material, setMaterial] = useState<Material | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(true);
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const handleVideoError = (errorMessage: string) => {
+    setVideoError(errorMessage);
+    setVideoLoading(false);
+  };
+
+  const handleVideoRetry = () => {
+    setVideoError(null);
+    setVideoLoading(true);
+    setRetryCount(prev => prev + 1);
+    
+    // Force video element to reload by updating the src
+    const videoElement = document.querySelector('video');
+    if (videoElement && material?.content.driveFileId) {
+      videoElement.src = `/api/video-stream/${material.content.driveFileId}?retry=${retryCount}`;
+    }
+  };
 
   useEffect(() => {
     const loadMaterial = async () => {
@@ -133,6 +153,13 @@ export default function MaterialDetailPage() {
           m.content?.driveFileId === params?.id || m.id === params?.id
         );
         setMaterial(foundMaterial || null);
+        
+        // Reset video states when material changes
+        if (foundMaterial?.type === 'video') {
+          setVideoLoading(true);
+          setVideoError(null);
+          setRetryCount(0);
+        }
       } catch (error) {
         console.error('Error loading material:', error);
       } finally {
@@ -191,11 +218,16 @@ export default function MaterialDetailPage() {
           {/* Title */}
           <h1 className="text-3xl font-bold text-foreground mb-4">{material.title}</h1>
           
-          {/* Short Description */}
-          <p className="text-lg text-muted-foreground mb-6">{material.shortDescription}</p>
-          
-          {/* Collapsible Full Description */}
+          {/* Description with toggle */}
           <div className="mb-6">
+            {!showFullDescription ? (
+              <p className="text-lg text-muted-foreground mb-4">{material.shortDescription}</p>
+            ) : (
+              <div className="prose prose-gray max-w-none mb-4">
+                <p className="text-lg text-muted-foreground leading-relaxed">{material.fullDescription}</p>
+              </div>
+            )}
+            
             <button
               onClick={() => setShowFullDescription(!showFullDescription)}
               className="flex items-center text-primary hover:text-primary/80 transition-colors"
@@ -205,14 +237,8 @@ export default function MaterialDetailPage() {
               ) : (
                 <ChevronDown className="h-4 w-4 mr-2" />
               )}
-              {showFullDescription ? "Hide" : "Show"} full description
+              {showFullDescription ? "Show" : "Show"} {showFullDescription ? "short" : "full"} description
             </button>
-            
-            {showFullDescription && (
-              <div className="mt-4 prose prose-gray max-w-none">
-                <p className="text-muted-foreground leading-relaxed">{material.fullDescription}</p>
-              </div>
-            )}
           </div>
 
           {/* Tags */}
@@ -234,28 +260,81 @@ export default function MaterialDetailPage() {
             <div>
               {material.type === "video" && material.content.url && (
                 <div className="rounded-lg overflow-hidden">
-                  {material.content.driveFileId ? (
-                    <div className="max-w-4xl mx-auto bg-black rounded-lg">
-                      <video
-                        src={`/api/video-stream/${material.content.driveFileId}`}
-                        controls
-                        className="w-full h-auto rounded-lg"
-                        preload="metadata"
-                        style={{ maxHeight: '70vh' }}
-                      >
-                        Your browser does not support the video tag.
-                      </video>
+                  {/* Video Loading Skeleton */}
+                  {videoLoading && (
+                    <div className="max-w-4xl mx-auto aspect-video bg-gray-200 rounded-lg flex items-center justify-center animate-pulse">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 bg-gray-300 rounded-full flex items-center justify-center">
+                          <Video className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <div className="text-gray-500 text-lg">Loading video...</div>
+                        <div className="w-32 h-2 bg-gray-300 rounded animate-pulse"></div>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                      <video
-                        src={material.content.url}
-                        controls
-                        className="w-full h-full object-contain"
-                        preload="metadata"
-                      >
-                        Your browser does not support the video tag.
-                      </video>
+                  )}
+                  
+                  {/* Video Error State */}
+                  {videoError && (
+                    <div className="max-w-4xl mx-auto aspect-video bg-red-50 rounded-lg flex items-center justify-center border border-red-200">
+                      <div className="text-center p-8">
+                        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-red-700 mb-2">Video Temporarily Unavailable</h3>
+                        <p className="text-red-600 mb-4 max-w-md">{videoError}</p>
+                        <div className="flex gap-2 justify-center flex-wrap">
+                          <button
+                            onClick={handleVideoRetry}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                          >
+                            <RefreshCw className="h-4 w-4" />
+                            Try Again
+                          </button>
+                          <Link
+                            href="/videos"
+                            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                          >
+                            Browse Videos
+                          </Link>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-4">💡 Tip: Check your internet connection or try refreshing the page</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Actual Video Player */}
+                  {!videoError && (
+                    <div className={videoLoading ? "hidden" : "block"}>
+                      {material.content.driveFileId ? (
+                        <div className="max-w-4xl mx-auto bg-black rounded-lg">
+                          <video
+                            src={`/api/video-stream/${material.content.driveFileId}`}
+                            controls
+                            className="w-full h-auto rounded-lg"
+                            preload="metadata"
+                            style={{ maxHeight: '70vh' }}
+                            onLoadStart={() => setVideoLoading(true)}
+                            onLoadedMetadata={() => setVideoLoading(false)}
+                            onCanPlay={() => setVideoLoading(false)}
+                            onError={() => handleVideoError('Failed to load video from Google Drive. The file may be temporarily unavailable or there may be a connection issue.')}
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      ) : (
+                        <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                          <video
+                            src={material.content.url}
+                            controls
+                            className="w-full h-full object-contain"
+                            preload="metadata"
+                            onLoadStart={() => setVideoLoading(true)}
+                            onLoadedMetadata={() => setVideoLoading(false)}
+                            onCanPlay={() => setVideoLoading(false)}
+                            onError={() => handleVideoError('Failed to load video. Please check the video URL and your connection.')}
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
