@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тревога и злость - Викторина</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #c62828 0%, #d32f2f 50%, #f44336 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .quiz-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #c62828;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .question-card {
+            background: #ffebee;
+            border: 2px solid #ef9a9a;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .question-card.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .option:hover {
+            border-color: #d32f2f;
+            background: #fce4ec;
+            transform: translateX(5px);
+        }
+        
+        .option.selected {
+            border-color: #d32f2f;
+            background: #d32f2f;
+            color: white;
+        }
+        
+        .option.correct {
+            border-color: #2e7d32;
+            background: #2e7d32;
+            color: white;
+        }
+        
+        .option.incorrect {
+            border-color: #bf360c;
+            background: #bf360c;
+            color: white;
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+            line-height: 1.6;
+        }
+        
+        .feedback.correct {
+            background: #e8f5e8;
+            color: #1b5e20;
+            border: 1px solid #2e7d32;
+        }
+        
+        .feedback.incorrect {
+            background: #fff3e0;
+            color: #bf360c;
+            border: 1px solid #bf360c;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d32f2f, #c62828);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #c62828;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #bdbdbd;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .score-display {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #c62828;
+            margin: 15px 0;
+        }
+        
+        .results {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .results h2 {
+            color: #c62828;
+            margin-bottom: 20px;
+        }
+        
+        .final-score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+        }
+        
+        .restart-btn {
+            background: #f44336;
+            margin-top: 20px;
+        }
+        
+        .restart-btn:hover {
+            background: #e53935;
+        }
+        
+        .question-number {
+            color: #d32f2f;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1>Тревога и злость</h1>
+            <p>Тест на основе лекции об управлении эмоциями и понимании их природы</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+        
+        <div class="score-display">
+            Счет: <span id="score">0</span> из <span id="total">0</span>
+        </div>
+        
+        <div id="quiz-content">
+            <!-- Questions will be inserted here -->
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="prevBtn" onclick="previousQuestion()">← Назад</button>
+            <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Далее →</button>
+        </div>
+        
+        <div class="results" id="results">
+            <h2>Результаты теста</h2>
+            <div class="final-score" id="finalScore"></div>
+            <p id="resultMessage"></p>
+            <button class="btn restart-btn" onclick="restartQuiz()">Пройти заново</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Какова главная причина зависти к чужим детям согласно лектору?",
+                options: [
+                    "Естественное желание иметь больше детей",
+                    "Гормональные изменения у женщин",
+                    "Привычка сравниваться с другими людьми",
+                    "Социальное давление общества"
+                ],
+                correct: 2,
+                explanation: "Автор объясняет, что проблема в сравнении: 'сравнение – это всегда открытая дверь к тревоге и агрессии', и что зависть к ребенку - лишь проявление более широкой привычки сравниваться."
+            },
+            {
+                question: "Можно ли полностью избавиться от тревоги?",
+                options: [
+                    "Да, с помощью специальных техник",
+                    "Нет, тревога заложена природой для выживания",
+                    "Да, но только с помощью медикаментов",
+                    "Можно, если достичь просветления"
+                ],
+                correct: 1,
+                explanation: "Лектор подчеркивает: 'не дай боже, вам навсегда избавиться от тревоги' и объясняет, что 'мы все потомки тех людей, которые умели тревожиться', потому что те, кто не тревожился, 'погибли первыми'."
+            },
+            {
+                question: "В чем разница между страхом и тревогой?",
+                options: [
+                    "Страх сильнее тревоги по интенсивности",
+                    "Страх - реакция на реальную опасность, тревога - на возможную",
+                    "Тревога длится дольше страха",
+                    "Страх физиологичен, тревога психологична"
+                ],
+                correct: 1,
+                explanation: "Автор поясняет разницу: страх - 'я вижу медведя, я испытываю в моменте страх', тревога - 'я иду по лесу и думаю, а вдруг медведь?' - размышления о потенциальной опасности."
+            },
+            {
+                question: "Что такое 'тревожное состояние' в отличие от тревоги?",
+                options: [
+                    "Более интенсивная форма обычной тревоги",
+                    "Переживания без реальной основы, когда человек 'сидит дома и думает, в лес не пойду, вдруг там медведи'",
+                    "Медицинский диагноз тревожного расстройства",
+                    "Тревога, которая длится больше недели"
+                ],
+                correct: 1,
+                explanation: "Лектор объясняет тревожное состояние как бессмысленные переживания: человек сидит дома и боится несуществующих медведей, которые могут залезть в окна."
+            },
+            {
+                question: "Что рекомендует автор при длительных тревожных состояниях с физическими симптомами?",
+                options: [
+                    "Немедленно обратиться к врачу",
+                    "Игнорировать симптомы и переключиться на работу",
+                    "Заполнить протокол СМЭР и изучить ошибки мышления",
+                    "Принять успокоительные препараты"
+                ],
+                correct: 2,
+                explanation: "При описании состояния с тряской рук и проблемами с сердцем автор рекомендует 'заполнить протокол СМЭР' и 'почитать об ошибках мышления', чтобы понять причины состояния."
+            },
+            {
+                question: "Почему люди испытывают тревогу перед начальниками?",
+                options: [
+                    "Из-за страха потерять работу",
+                    "Потому что начальники проецируются как родительские фигуры",
+                    "Из-за низкой самооценки сотрудников",
+                    "Потому что начальники обычно агрессивны"
+                ],
+                correct: 1,
+                explanation: "Автор объясняет: 'руководители находятся в состоянии родительской фигуры для нас, потому что так или иначе они поощряют, наказывают, заботятся о нас'."
+            },
+            {
+                question: "Что является основными эмоциями человека согласно лектору?",
+                options: [
+                    "Радость и печаль",
+                    "Любовь и ненависть", 
+                    "Тревога и злость",
+                    "Страх и гнев"
+                ],
+                correct: 2,
+                explanation: "Лектор четко заявляет: 'тревога и злость, они всегда идут рука об руку' и что это 'основные эмоции, которые ощущает и чувствует наш ум'."
+            },
+            {
+                question: "Как правильно 'проживать' эмоции?",
+                options: [
+                    "Сидеть и бояться или ходить с топором",
+                    "Понимать, что чувствуешь и почему, для принятия действий",
+                    "Подавлять их и не показывать окружающим",
+                    "Выплескивать эмоции на других людей"
+                ],
+                correct: 1,
+                explanation: "Автор подчеркивает: 'проживать — это значит понимать, что я сейчас чувствую и почему я это чувствую, для чего', а не 'сидеть бояться или ходить с топором на перевес'."
+            },
+            {
+                question: "Что происходит, когда человек чувствует себя 'незначимым'?",
+                options: [
+                    "Он становится более скромным",
+                    "Он чувствует себя 'слабым' и испытывает злость",
+                    "Он начинает работать над самооценкой",
+                    "Он избегает общения с людьми"
+                ],
+                correct: 1,
+                explanation: "В разборе случая развода автор показывает цепочку: незначимый → слабый → злость. Это убеждение заставляет человека доказывать свою силу и значимость."
+            },
+            {
+                question: "Сколько 'мозгов' у человека согласно лектору и какова задача?",
+                options: [
+                    "Один мозг, задача - использовать его эффективно",
+                    "Два мозга - логический и эмоциональный",
+                    "Три мозга: два животных и один человеческий, задача - дотянуть до человеческого",
+                    "Четыре мозга соответственно разным функциям"
+                ],
+                correct: 2,
+                explanation: "Лектор объясняет: 'у нас три мозга, два из них животных, только один человеческий' и призывает 'дотянуть до неокортекса', чтобы оставаться в человеческом состоянии осознанности."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function initQuiz() {
+            document.getElementById('total').textContent = questions.length;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const quizContent = document.getElementById('quiz-content');
+            const question = questions[currentQuestion];
+            
+            quizContent.innerHTML = `
+                <div class="question-card active">
+                    <div class="question-number">Вопрос ${currentQuestion + 1} из ${questions.length}</div>
+                    <div class="question">${question.question}</div>
+                    <div class="options">
+                        ${question.options.map((option, index) => 
+                            `<div class="option" onclick="selectOption(${index})" data-index="${index}">
+                                ${option}
+                            </div>`
+                        ).join('')}
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                </div>
+            `;
+            
+            updateProgress();
+            updateButtons();
+            answered = false;
+        }
+
+        function selectOption(selectedIndex) {
+            if (answered) return;
+            
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+                option.style.cursor = 'default';
+            });
+            
+            if (selectedIndex === question.correct) {
+                score++;
+                feedback.className = 'feedback correct';
+                feedback.textContent = `Правильно! ${question.explanation}`;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = `Неправильно. ${question.explanation}`;
+            }
+            
+            feedback.style.display = 'block';
+            document.getElementById('score').textContent = score;
+            document.getElementById('nextBtn').disabled = false;
+            answered = true;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').textContent = currentQuestion === questions.length - 1 ? 'Завершить' : 'Далее →';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-content').style.display = 'none';
+            document.querySelector('.controls').style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'none';
+            document.querySelector('.score-display').style.display = 'none';
+            
+            const results = document.getElementById('results');
+            const percentage = Math.round((score / questions.length) * 100);
+            
+            let message = '';
+            if (percentage >= 80) {
+                message = 'Отлично! Вы хорошо понимаете принципы эмоциональной саморегуляции и осознанности из этой лекции.';
+            } else if (percentage >= 60) {
+                message = 'Хорошо! У вас есть базовое понимание материала. Эти знания помогут вам лучше управлять своими эмоциями.';
+            } else {
+                message = 'Рекомендуем еще раз изучить лекцию. Понимание природы эмоций очень важно для психологического благополучия.';
+            }
+            
+            document.getElementById('finalScore').textContent = `${score} из ${questions.length} (${percentage}%)`;
+            document.getElementById('resultMessage').textContent = message;
+            
+            results.style.display = 'block';
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answered = false;
+            
+            document.getElementById('quiz-content').style.display = 'block';
+            document.querySelector('.controls').style.display = 'flex';
+            document.querySelector('.progress-bar').style.display = 'block';
+            document.querySelector('.score-display').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            document.getElementById('score').textContent = '0';
+            initQuiz();
+        }
+
+        // Initialize quiz when page loads
+        initQuiz();
+    </script>
+</body>
+</html>

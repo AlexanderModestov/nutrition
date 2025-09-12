@@ -1,0 +1,13 @@
+
+> expert-knowledge-hub@0.1.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+  ▲ Next.js 14.2.5
+  - Local:        http://localhost:3001
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 2.5s
+ ○ Compiling /api/podcasts ...
+ ✓ Compiled /api/podcasts in 4.3s (1224 modules)

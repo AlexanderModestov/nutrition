@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ожидания в отношениях - Викторина</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #8b5fbf 0%, #5b9bd5 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .quiz-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #8b5fbf;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .question-card {
+            background: #f8f9ff;
+            border: 2px solid #e1e8ff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .question-card.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        
+        .option:hover {
+            border-color: #8b5fbf;
+            background: #f5f0ff;
+            transform: translateX(5px);
+        }
+        
+        .option.selected {
+            border-color: #8b5fbf;
+            background: #8b5fbf;
+            color: white;
+        }
+        
+        .option.correct {
+            border-color: #4CAF50;
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .option.incorrect {
+            border-color: #f44336;
+            background: #f44336;
+            color: white;
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .feedback.correct {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #4CAF50;
+        }
+        
+        .feedback.incorrect {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #f44336;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5fbf, #5b9bd5);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            background: #8b5fbf;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #7a52a8;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .score-display {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #8b5fbf;
+            margin: 15px 0;
+        }
+        
+        .results {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .results h2 {
+            color: #8b5fbf;
+            margin-bottom: 20px;
+        }
+        
+        .final-score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+        }
+        
+        .restart-btn {
+            background: #5b9bd5;
+            margin-top: 20px;
+        }
+        
+        .restart-btn:hover {
+            background: #4a8bc2;
+        }
+        
+        .question-number {
+            color: #8b5fbf;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1>Ожидания в отношениях</h1>
+            <p>Тест на основе лекции об объектификации партнеров и здоровых ожиданиях</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+        
+        <div class="score-display">
+            Счет: <span id="score">0</span> из <span id="total">0</span>
+        </div>
+        
+        <div id="quiz-content">
+            <!-- Questions will be inserted here -->
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="prevBtn" onclick="previousQuestion()">← Назад</button>
+            <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Далее →</button>
+        </div>
+        
+        <div class="results" id="results">
+            <h2>Результаты теста</h2>
+            <div class="final-score" id="finalScore"></div>
+            <p id="resultMessage"></p>
+            <button class="btn restart-btn" onclick="restartQuiz()">Пройти заново</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Что является основной проблемой современных отношений согласно лекции?",
+                options: [
+                    "Нехватка времени на отношения",
+                    "Восприятие партнеров как объектов и инструментов",
+                    "Слишком высокие требования к внешности",
+                    "Недостаток романтики в отношениях"
+                ],
+                correct: 1,
+                explanation: "Автор подчеркивает, что главная проблема в том, что люди воспринимают партнеров как объекты (часть интерьера) или как инструменты для решения своих проблем."
+            },
+            {
+                question: "Как ребенок может стать 'объектом' в семье?",
+                options: [
+                    "Когда родители покупают ему дорогие игрушки",
+                    "Когда о нем говорят в третьем лице, как будто его нет рядом",
+                    "Когда ему не разрешают высказывать свое мнение",
+                    "Когда его часто наказывают"
+                ],
+                correct: 1,
+                explanation: "В лекции приводится пример, когда родители ругаются из-за ребенка, говоря о нем 'его забыл забрать', и ребенок чувствует себя неодушевленным предметом."
+            },
+            {
+                question: "Что происходит, когда женщина выбирает мужчину как 'инструмент безопасности'?",
+                options: [
+                    "Она становится более независимой",
+                    "Ожидает, что он будет угадывать ее потребности как мать младенца",
+                    "Отношения становятся более страстными",
+                    "Мужчина чувствует себя более нужным"
+                ],
+                correct: 1,
+                explanation: "Автор объясняет, что женщина из детского состояния будет ждать, что партнер угадает ее потребности, как мать угадывает потребности плачущего младенца."
+            },
+            {
+                question: "Откуда берутся ожидания от партнера в отношениях?",
+                options: [
+                    "Из фильмов и социальных сетей",
+                    "Из нереализованных потребностей детства и дефицитов от родителей",
+                    "Из советов друзей и подруг",
+                    "Из книг по психологии"
+                ],
+                correct: 1,
+                explanation: "В лекции четко говорится, что ожидания от партнера базируются на внутренних ожиданиях от родителей и детских дефицитах."
+            },
+            {
+                question: "Почему не стоит обвинять родителей в своих проблемах?",
+                options: [
+                    "Потому что это невежливо",
+                    "Пока виноваты родители, вы ничего не можете изменить",
+                    "Потому что они всегда правы",
+                    "Потому что они уже взрослые"
+                ],
+                correct: 1,
+                explanation: "Автор объясняет, что обвинение родителей лишает возможности самостоятельно решать проблемы. Когда вы понимаете свой дефицит, у вас есть шанс его закрыть."
+            },
+            {
+                question: "Как понять, что нехватка чего-то реальная, а не из детства?",
+                options: [
+                    "Спросить у психолога",
+                    "Прочитать об этом в книгах",
+                    "Если можете это закрыть сами или попросить помощи у других",
+                    "Если это длится больше года"
+                ],
+                correct: 2,
+                explanation: "Автор говорит, что взрослый человек может закрывать потребности сам или просить о помощи. Если этого не делается, значит человек в детском состоянии."
+            },
+            {
+                question: "Что значит быть 'инструментом' в детстве?",
+                options: [
+                    "Помогать родителям по хозяйству",
+                    "Быть средством в борьбе родителей друг с другом",
+                    "Хорошо учиться в школе",
+                    "Слушаться старших"
+                ],
+                correct: 1,
+                explanation: "В лекции объясняется, что ребенок становится инструментом, когда родители используют его в своих конфликтах, заставляя передавать сообщения или выбирать сторону."
+            },
+            {
+                question: "Как ребенок может стать 'нарциссическим расширением' родителя?",
+                options: [
+                    "Когда он очень похож на родителя внешне",
+                    "Когда родитель использует достижения ребенка для получения похвалы себе",
+                    "Когда ребенок повторяет характер родителя",
+                    "Когда родитель покупает ребенку дорогие вещи"
+                ],
+                correct: 1,
+                explanation: "Автор приводит пример, когда мать заставляет ребенка рассказывать стихи, петь, танцевать, чтобы через похвалу ребенку получить признание себе как отличной матери."
+            },
+            {
+                question: "Что происходит в практике с лодкой, когда человек не знает своих целей?",
+                options: [
+                    "Лодка тонет",
+                    "Возникает желание плыть к цели другого человека",
+                    "Лодка плывет по кругу",
+                    "Появляется страх воды"
+                ],
+                correct: 1,
+                explanation: "Один из участников отметил в комментариях, что когда нет своей цели, хочется плыть к цели партнера, что указывает на проблему самопожертвования."
+            },
+            {
+                question: "Почему мы не можем рассчитывать только на себя на 100%?",
+                options: [
+                    "Потому что мы слабые существа",
+                    "Потому что мы стайные существа и живем в постоянном взаимодействии",
+                    "Потому что так принято в обществе",
+                    "Потому что это эгоистично"
+                ],
+                correct: 1,
+                explanation: "Автор объясняет, что мы стайные существа и постоянно взаимодействуем с соседями, коллегами, друзьями. Полное одиночество в современном мире почти невозможно."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function initQuiz() {
+            document.getElementById('total').textContent = questions.length;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const quizContent = document.getElementById('quiz-content');
+            const question = questions[currentQuestion];
+            
+            quizContent.innerHTML = `
+                <div class="question-card active">
+                    <div class="question-number">Вопрос ${currentQuestion + 1} из ${questions.length}</div>
+                    <div class="question">${question.question}</div>
+                    <div class="options">
+                        ${question.options.map((option, index) => 
+                            `<div class="option" onclick="selectOption(${index})" data-index="${index}">
+                                ${option}
+                            </div>`
+                        ).join('')}
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                </div>
+            `;
+            
+            updateProgress();
+            updateButtons();
+            answered = false;
+        }
+
+        function selectOption(selectedIndex) {
+            if (answered) return;
+            
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+                option.style.cursor = 'default';
+            });
+            
+            if (selectedIndex === question.correct) {
+                score++;
+                feedback.className = 'feedback correct';
+                feedback.textContent = `Правильно! ${question.explanation}`;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = `Неправильно. ${question.explanation}`;
+            }
+            
+            feedback.style.display = 'block';
+            document.getElementById('score').textContent = score;
+            document.getElementById('nextBtn').disabled = false;
+            answered = true;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').textContent = currentQuestion === questions.length - 1 ? 'Завершить' : 'Далее →';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-content').style.display = 'none';
+            document.querySelector('.controls').style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'none';
+            document.querySelector('.score-display').style.display = 'none';
+            
+            const results = document.getElementById('results');
+            const percentage = Math.round((score / questions.length) * 100);
+            
+            let message = '';
+            if (percentage >= 80) {
+                message = 'Отлично! Вы хорошо понимаете концепции здоровых отношений и проблемы объектификации партнеров.';
+            } else if (percentage >= 60) {
+                message = 'Хорошо! У вас есть базовое понимание темы. Рекомендуем еще раз изучить материал для более глубокого понимания.';
+            } else {
+                message = 'Стоит внимательнее изучить лекцию. Понимание этих концепций поможет строить более здоровые отношения.';
+            }
+            
+            document.getElementById('finalScore').textContent = `${score} из ${questions.length} (${percentage}%)`;
+            document.getElementById('resultMessage').textContent = message;
+            
+            results.style.display = 'block';
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answered = false;
+            
+            document.getElementById('quiz-content').style.display = 'block';
+            document.querySelector('.controls').style.display = 'flex';
+            document.querySelector('.progress-bar').style.display = 'block';
+            document.querySelector('.score-display').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            document.getElementById('score').textContent = '0';
+            initQuiz();
+        }
+
+        // Initialize quiz when page loads
+        initQuiz();
+    </script>
+</body>
+</html>

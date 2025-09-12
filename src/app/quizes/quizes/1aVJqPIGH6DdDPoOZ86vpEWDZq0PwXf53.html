@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Викторина: Женственность и Идентичность</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 25px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15);
+            max-width: 850px;
+            width: 100%;
+            padding: 45px;
+            transition: transform 0.4s ease;
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 35px;
+            font-size: 2.6em;
+            font-weight: bold;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .intro-text {
+            text-align: center;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.8;
+            font-size: 1.1em;
+        }
+
+        .intro-quote {
+            font-style: italic;
+            background: linear-gradient(135deg, #fff5f5, #fff0f8);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border-left: 5px solid #ff9a9e;
+            color: #666;
+        }
+
+        .progress-bar {
+            background: #f0f0f0;
+            height: 12px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff9a9e, #fecfef);
+            border-radius: 15px;
+            transition: width 0.6s ease;
+        }
+
+        .question-container {
+            background: linear-gradient(135deg, #fafafa, #fff);
+            padding: 35px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .question-type {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            margin-bottom: 18px;
+            font-weight: 500;
+        }
+
+        .question {
+            font-size: 1.25em;
+            color: #333;
+            margin-bottom: 28px;
+            line-height: 1.7;
+        }
+
+        .scenario-box {
+            background: linear-gradient(135deg, #fff5f5, #fff0f8);
+            padding: 22px;
+            border-radius: 15px;
+            border: 2px solid #fce4ec;
+            margin-bottom: 22px;
+            font-style: italic;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .option {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 15px;
+            border: 2px solid #f5f5f5;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.05em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            opacity: 0.08;
+            transition: left 0.3s ease;
+        }
+
+        .option:hover:before {
+            left: 0;
+        }
+
+        .option:hover {
+            transform: translateX(8px);
+            border-color: #ff9a9e;
+            box-shadow: 0 10px 30px rgba(255, 154, 158, 0.15);
+        }
+
+        .option.selected {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: white;
+            border-color: transparent;
+        }
+
+        .option.correct {
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+            border-color: transparent;
+            animation: pulse 0.5s ease;
+        }
+
+        .option.incorrect {
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            color: white;
+            border-color: transparent;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .true-false-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .true-false-btn {
+            flex: 1;
+            padding: 28px;
+            font-size: 1.2em;
+            background: white;
+            border: 2px solid #f5f5f5;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .true-false-btn:hover {
+            transform: scale(1.05);
+            border-color: #ff9a9e;
+            box-shadow: 0 10px 30px rgba(255, 154, 158, 0.15);
+        }
+
+        .true-false-btn.selected {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: white;
+            border-color: transparent;
+        }
+
+        .true-false-btn.correct {
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+        }
+
+        .true-false-btn.incorrect {
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            color: white;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-size: 1.15em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 35px auto 0;
+            box-shadow: 0 12px 35px rgba(255, 154, 158, 0.3);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 45px rgba(255, 154, 158, 0.4);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .explanation {
+            background: linear-gradient(135deg, #fff8e1, #ffecb3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 22px;
+            border-left: 5px solid #ffc107;
+            display: none;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 500px; }
+        }
+
+        .score-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            box-shadow: 0 20px 50px rgba(255, 154, 158, 0.3);
+        }
+
+        .score-text {
+            color: white;
+            font-size: 3.5em;
+            font-weight: bold;
+        }
+
+        .feedback {
+            text-align: center;
+            color: #555;
+            font-size: 1.25em;
+            line-height: 1.7;
+            margin: 25px 0;
+        }
+
+        .result-emoji {
+            font-size: 2.5em;
+            margin: 15px 0;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌸 Женственность и Идентичность</h1>
+        
+        <div class="screen active" id="startScreen">
+            <div class="intro-quote">
+                "Женственность - это ваше видение, то, как вы чувствуете и то, как вы видите, конкретно вы и никто другой. Все остальные варианты - это стереотипы и навязанные мнения."
+            </div>
+            <div class="intro-text">
+                <p>Добро пожаловать в викторину о женственности и гендерной идентичности!</p>
+                <p>Исследуйте, как формируются наши представления о женственности и как они влияют на самовосприятие.</p>
+                <p>📊 12 вопросов | 🎭 Разные форматы | 💭 Глубокое понимание</p>
+            </div>
+            <button class="btn" onclick="startQuiz()">Начать викторину</button>
+        </div>
+
+        <div class="screen" id="quizScreen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+            <div class="question-container">
+                <div class="question-type" id="questionType"></div>
+                <div class="question" id="questionText"></div>
+                <div id="answerArea"></div>
+                <div class="explanation" id="explanation"></div>
+            </div>
+            <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Следующий вопрос</button>
+        </div>
+
+        <div class="screen" id="resultScreen">
+            <div class="score-display">
+                <div class="score-circle">
+                    <div class="score-text" id="finalScore"></div>
+                </div>
+                <div class="result-emoji" id="resultEmoji"></div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+            <button class="btn" onclick="restartQuiz()">Пройти ещё раз</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                type: "multiple",
+                question: "Согласно материалу, что такое женственность?",
+                options: [
+                    "Единый универсальный образ для всех женщин",
+                    "Индивидуальное чувствование и проявление каждой женщины",
+                    "Только ношение юбок и платьев",
+                    "Обязательная слабость и покладистость"
+                ],
+                correct: 1,
+                explanation: "Женственность - это индивидуальное понимание и чувствование каждой женщины. У каждого есть свой образ женственности, который формируется из личного опыта и восприятия."
+            },
+            {
+                type: "true-false",
+                question: "Длинные юбки - это универсальный признак женственности.",
+                correct: false,
+                explanation: "Это просто атрибут, принятый в обществе. В качестве примера приводится арабский танец дервишей, который танцуется только в юбках и только мужчинами."
+            },
+            {
+                type: "scenario",
+                scenario: "5-летняя девочка играет, представляя себя мальчиком, и говорит, что хочет быть как брат.",
+                question: "Что может быть причиной такого поведения согласно материалу?",
+                options: [
+                    "Это всегда признак гендерной дисфории",
+                    "Девочка видит, что мальчикам/брату быть выгоднее в семье",
+                    "Это обязательно нужно срочно исправлять",
+                    "Девочка просто играет и это пройдёт само"
+                ],
+                correct: 1,
+                explanation: "Дети идут за силой. Если девочка видит, что брату уделяется больше внимания, уважения, или папа с братом - отдельная 'каста' в семье, она может хотеть быть в этом кругу."
+            },
+            {
+                type: "multiple",
+                question: "Откуда формируется наш образ женственности?",
+                options: [
+                    "Только из журналов и телевидения",
+                    "Из опыта значимых женщин в детстве (мама, бабушка, тётя)",
+                    "Это врождённое качество",
+                    "Только из социальных стереотипов"
+                ],
+                correct: 1,
+                explanation: "Образ женственности создавался с помощью значимых взрослых - мамы, бабушки, тёти. Рекомендуется проанализировать, какие женщины вас окружали и как они себя проявляли."
+            },
+            {
+                type: "multiple",
+                question: "Что говорится о женственности в разные исторические периоды?",
+                options: [
+                    "Она всегда была одинаковой",
+                    "В каждую эпоху был свой образ женственности, и у женщин были партнёры",
+                    "Раньше женственности не существовало",
+                    "Только современное понимание правильное"
+                ],
+                correct: 1,
+                explanation: "В 20-е годы женщины носили мужские костюмы и курили сигары, в 70-80-е - ходили с химией на голове и авоськами. В каждую эпоху был свой образ, и у женщин всегда были мужчины."
+            },
+            {
+                type: "true-false",
+                question: "Все женщины обязательно должны выйти замуж и родить детей.",
+                correct: false,
+                explanation: "Не всем нужно выходить замуж и не всем нужно рожать детей. Это стереотип. Важно понимать свои истинные желания, а не следовать навязанным общественным ожиданиям."
+            },
+            {
+                type: "scenario",
+                scenario: "Женщина подстраивается под каждого мужчину на свиданиях, стараясь быть такой, какой он хочет её видеть.",
+                question: "К чему это приводит согласно материалу?",
+                options: [
+                    "К успешным отношениям",
+                    "Мужчина чувствует, будто сходил на свидание сам с собой",
+                    "Это правильная стратегия поведения",
+                    "Это проявление истинной женственности"
+                ],
+                correct: 1,
+                explanation: "Когда женщины калибруют мужчину и стараются быть такими, как надо ему, а не такими, какие они есть, мужчина чувствует, будто общается с одной и той же женщиной или с собственным отражением."
+            },
+            {
+                type: "multiple",
+                question: "Что такое женская энергия с точки зрения физики, упомянутой в тексте?",
+                options: [
+                    "Мистическая сила из юбок",
+                    "Разница в вибрациях, дыхании, пульсе между мужчинами и женщинами",
+                    "Энергия от природы и детей",
+                    "Способность к магии"
+                ],
+                correct: 1,
+                explanation: "С точки зрения физики, мужчины и женщины по-разному вибрируют: у мужчин глубже дыхание, чаще пульс, выше температура. Тело, как электроприбор, имеет разные настройки и вырабатывает энергию по-разному."
+            },
+            {
+                type: "true-false",
+                question: "В каждой женщине есть мужская часть, и в каждом мужчине - женская.",
+                correct: true,
+                explanation: "В каждом есть мама и папа. Мужская часть в женщине проявляется в моменты, когда это необходимо (например, защита ребёнка). Это естественно и нормально."
+            },
+            {
+                type: "multiple",
+                question: "По какому принципу люди выбирают партнёров согласно материалу?",
+                options: [
+                    "По внешности",
+                    "По детскому дефициту - ищут то, чего не хватило в детстве",
+                    "По социальному статусу",
+                    "Случайным образом"
+                ],
+                correct: 1,
+                explanation: "Не вы выбираете, а выбирает ваше бессознательное по детскому дефициту. Человек ищет то, чего ему не хватило в детстве."
+            },
+            {
+                type: "scenario",
+                scenario: "Мама приходит с работы и готовит, убирает, делает уроки с детьми. Папа приходит с работы и смотрит телевизор.",
+                question: "Как это может повлиять на восприятие девочки?",
+                options: [
+                    "Никак не повлияет",
+                    "Девочка может решить, что мужчиной быть проще и выгоднее",
+                    "Девочка будет гордиться мамой",
+                    "Это нормальная модель семьи"
+                ],
+                correct: 1,
+                explanation: "Дети не глупые, они видят, где 'сила'. Если папа в более выгодной позиции, девочка может понять, что мужчиной быть проще, и начать идентифицировать себя с мужской ролью."
+            },
+            {
+                type: "true-false",
+                question: "Женственность должна быть одинаковой в XXI веке, как и в XIX-XX веках.",
+                correct: false,
+                explanation: "То, что было женственностью в XIX-XX веках, совсем не обязательно должно быть женственностью в XXI веке. Важно понимать свои собственные проявления и понимания, а не следовать устаревшим шаблонам."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function startQuiz() {
+            document.getElementById('startScreen').classList.remove('active');
+            document.getElementById('quizScreen').classList.add('active');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            answered = false;
+            const question = questions[currentQuestion];
+            
+            // Update progress
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            
+            // Set question type
+            let typeLabel = '';
+            if (question.type === 'multiple') typeLabel = 'Выберите ответ';
+            else if (question.type === 'true-false') typeLabel = 'Правда или ложь';
+            else if (question.type === 'scenario') typeLabel = 'Анализ ситуации';
+            
+            document.getElementById('questionType').textContent = typeLabel;
+            
+            // Create content
+            const answerArea = document.getElementById('answerArea');
+            answerArea.innerHTML = '';
+            
+            if (question.type === 'scenario') {
+                const scenarioBox = document.createElement('div');
+                scenarioBox.className = 'scenario-box';
+                scenarioBox.textContent = question.scenario;
+                answerArea.appendChild(scenarioBox);
+                
+                document.getElementById('questionText').textContent = question.question;
+                
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'options';
+                question.options.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    optionDiv.textContent = option;
+                    optionDiv.onclick = () => selectOption(index);
+                    optionsDiv.appendChild(optionDiv);
+                });
+                answerArea.appendChild(optionsDiv);
+                
+            } else if (question.type === 'multiple') {
+                document.getElementById('questionText').textContent = question.question;
+                
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'options';
+                question.options.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    optionDiv.textContent = option;
+                    optionDiv.onclick = () => selectOption(index);
+                    optionsDiv.appendChild(optionDiv);
+                });
+                answerArea.appendChild(optionsDiv);
+                
+            } else if (question.type === 'true-false') {
+                document.getElementById('questionText').textContent = question.question;
+                
+                const trueFalseDiv = document.createElement('div');
+                trueFalseDiv.className = 'true-false-container';
+                
+                const trueBtn = document.createElement('button');
+                trueBtn.className = 'true-false-btn';
+                trueBtn.textContent = '✓ Правда';
+                trueBtn.onclick = () => selectTrueFalse(true);
+                
+                const falseBtn = document.createElement('button');
+                falseBtn.className = 'true-false-btn';
+                falseBtn.textContent = '✗ Ложь';
+                falseBtn.onclick = () => selectTrueFalse(false);
+                
+                trueFalseDiv.appendChild(trueBtn);
+                trueFalseDiv.appendChild(falseBtn);
+                answerArea.appendChild(trueFalseDiv);
+            }
+            
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('explanation').classList.remove('show');
+        }
+
+        function selectOption(index) {
+            if (answered) return;
+            answered = true;
+            
+            const options = document.querySelectorAll('.option');
+            const question = questions[currentQuestion];
+            
+            options[index].classList.add('selected');
+            
+            setTimeout(() => {
+                if (index === question.correct) {
+                    options[index].classList.add('correct');
+                    score++;
+                } else {
+                    options[index].classList.add('incorrect');
+                    options[question.correct].classList.add('correct');
+                }
+                showExplanation();
+            }, 500);
+        }
+
+        function selectTrueFalse(answer) {
+            if (answered) return;
+            answered = true;
+            
+            const buttons = document.querySelectorAll('.true-false-btn');
+            const question = questions[currentQuestion];
+            const selectedBtn = answer ? buttons[0] : buttons[1];
+            
+            selectedBtn.classList.add('selected');
+            
+            setTimeout(() => {
+                if (answer === question.correct) {
+                    selectedBtn.classList.add('correct');
+                    score++;
+                } else {
+                    selectedBtn.classList.add('incorrect');
+                    const correctBtn = question.correct ? buttons[0] : buttons[1];
+                    correctBtn.classList.add('correct');
+                }
+                showExplanation();
+            }, 500);
+        }
+
+        function showExplanation() {
+            const question = questions[currentQuestion];
+            const explanationDiv = document.getElementById('explanation');
+            explanationDiv.innerHTML = `<strong>💡 Пояснение:</strong> ${question.explanation}`;
+            explanationDiv.classList.add('show');
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').classList.remove('active');
+            document.getElementById('resultScreen').classList.add('active');
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('finalScore').textContent = `${score}/${questions.length}`;
+            
+            let emoji, feedback;
+            if (percentage >= 83) {
+                emoji = '🌸';
+                feedback = 'Отлично! Вы глубоко понимаете, что женственность - это индивидуальный выбор, а не навязанные стереотипы. Вы осознаёте важность самопознания и принятия себя.';
+            } else if (percentage >= 67) {
+                emoji = '🌺';
+                feedback = 'Хороший результат! У вас есть понимание того, что женственность многогранна и индивидуальна, хотя некоторые стереотипы ещё могут влиять на восприятие.';
+            } else if (percentage >= 50) {
+                emoji = '🌷';
+                feedback = 'Неплохо! Вы на пути к пониманию того, что женственность - это личный выбор каждой женщины, а не универсальный шаблон.';
+            } else {
+                emoji = '🌱';
+                feedback = 'Есть пространство для размышлений. Помните: ваша женственность - это то, как вы её чувствуете и видите, а не то, что навязывает общество.';
+            }
+            
+            document.getElementById('resultEmoji').textContent = emoji;
+            document.getElementById('feedback').textContent = feedback;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            document.getElementById('resultScreen').classList.remove('active');
+            document.getElementById('startScreen').classList.add('active');
+        }
+    </script>
+</body>
+</html>

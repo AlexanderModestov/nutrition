@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Викторина: Восприятие и Самооценка</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #3494e6 0%, #ec6ead 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
+            max-width: 750px;
+            width: 100%;
+            padding: 45px;
+            transition: transform 0.4s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-8px);
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #3494e6, #ec6ead);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 35px;
+            font-size: 2.8em;
+            font-weight: bold;
+        }
+
+        .start-screen, .quiz-screen, .result-screen {
+            display: none;
+        }
+
+        .start-screen.active, .quiz-screen.active, .result-screen.active {
+            display: block;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(25px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .intro-text {
+            text-align: center;
+            color: #555;
+            margin-bottom: 35px;
+            line-height: 1.8;
+            font-size: 1.15em;
+        }
+
+        .intro-quote {
+            font-style: italic;
+            color: #777;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 4px solid #ec6ead;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            background: #e8e8e8;
+            height: 12px;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3494e6 0%, #ec6ead 100%);
+            border-radius: 15px;
+            transition: width 0.6s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            margin-top: 10px;
+            font-size: 0.95em;
+        }
+
+        .question-container {
+            background: linear-gradient(135deg, #f5f5f5, #fafafa);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .question-type {
+            background: linear-gradient(135deg, #3494e6, #ec6ead);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .question {
+            font-size: 1.25em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .option {
+            background: white;
+            padding: 18px 25px;
+            border-radius: 15px;
+            border: 2px solid #e8e8e8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.05em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #3494e6, #ec6ead);
+            opacity: 0.1;
+            transition: left 0.3s ease;
+        }
+
+        .option:hover:before {
+            left: 0;
+        }
+
+        .option:hover {
+            transform: translateX(8px);
+            border-color: #ec6ead;
+            box-shadow: 0 8px 25px rgba(236, 106, 173, 0.2);
+        }
+
+        .option.selected {
+            background: linear-gradient(135deg, #3494e6, #ec6ead);
+            color: white;
+            border-color: transparent;
+        }
+
+        .option.correct {
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+            border-color: transparent;
+            animation: pulse 0.5s ease;
+        }
+
+        .option.incorrect {
+            background: linear-gradient(135deg, #f44336, #ef5350);
+            color: white;
+            border-color: transparent;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3494e6, #ec6ead);
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            border-radius: 50px;
+            font-size: 1.15em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 35px auto 0;
+            box-shadow: 0 12px 35px rgba(52, 148, 230, 0.3);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 45px rgba(52, 148, 230, 0.4);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .explanation {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-left: 5px solid #ff9800;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from { 
+                opacity: 0; 
+                max-height: 0; 
+            }
+            to { 
+                opacity: 1; 
+                max-height: 500px; 
+            }
+        }
+
+        .score-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3494e6, #ec6ead);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            box-shadow: 0 20px 50px rgba(52, 148, 230, 0.3);
+            position: relative;
+        }
+
+        .score-circle:before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3494e6, #ec6ead);
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        .score-text {
+            color: white;
+            font-size: 3.5em;
+            font-weight: bold;
+        }
+
+        .feedback {
+            text-align: center;
+            color: #555;
+            font-size: 1.25em;
+            line-height: 1.7;
+            margin: 25px 0;
+        }
+
+        .result-emoji {
+            font-size: 2.5em;
+            margin: 15px 0;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .true-false-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .true-false-btn {
+            flex: 1;
+            padding: 25px;
+            font-size: 1.3em;
+            background: white;
+            border: 2px solid #e8e8e8;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .true-false-btn:hover {
+            transform: scale(1.05);
+            border-color: #ec6ead;
+            box-shadow: 0 8px 25px rgba(236, 106, 173, 0.2);
+        }
+
+        .true-false-btn.selected {
+            background: linear-gradient(135deg, #3494e6, #ec6ead);
+            color: white;
+            border-color: transparent;
+        }
+
+        .true-false-btn.correct {
+            background: linear-gradient(135deg, #4CAF50, #66BB6A);
+            color: white;
+        }
+
+        .true-false-btn.incorrect {
+            background: linear-gradient(135deg, #f44336, #ef5350);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👁️ Восприятие и Самооценка</h1>
+        
+        <div class="start-screen active">
+            <div class="intro-quote">
+                "Красота в глазах смотрящего" - эта мудрость показывает, как наше восприятие формирует реальность вокруг нас.
+            </div>
+            <div class="intro-text">
+                <p>Добро пожаловать в викторину о восприятии и самооценке!</p>
+                <p>Исследуйте, как ваш взгляд на себя влияет на то, что вы видите в мире.</p>
+                <p>📝 10 вопросов | 🎯 Разные форматы | 🧠 Глубокие размышления</p>
+            </div>
+            <button class="btn" onclick="startQuiz()">Начать исследование</button>
+        </div>
+
+        <div class="quiz-screen">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+                <div class="progress-text" id="progressText"></div>
+            </div>
+            <div class="question-container">
+                <div class="question-type" id="questionType"></div>
+                <div class="question" id="questionText"></div>
+                <div id="answerArea"></div>
+                <div class="explanation" id="explanation"></div>
+            </div>
+            <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Следующий вопрос</button>
+        </div>
+
+        <div class="result-screen">
+            <div class="score-display">
+                <div class="score-circle">
+                    <div class="score-text" id="finalScore"></div>
+                </div>
+                <div class="result-emoji" id="resultEmoji"></div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+            <button class="btn" onclick="restartQuiz()">Пройти ещё раз</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                type: "multiple",
+                question: "Согласно тексту, что означает фраза 'Красота в глазах смотрящего'?",
+                options: [
+                    "Красота объективна и одинакова для всех",
+                    "Любое чувство находится в глазах смотрящего человека",
+                    "Красота существует только в искусстве",
+                    "Красивые люди видят мир красивым"
+                ],
+                correct: 1,
+                explanation: "Текст расширяет эту фразу, говоря что 'любое чувство в ваших глазах' - то есть наше восприятие определяет то, что мы видим и чувствуем."
+            },
+            {
+                type: "true-false",
+                question: "Все люди, слушающие одну и ту же информацию, воспринимают её одинаково.",
+                correct: false,
+                explanation: "Текст подчёркивает, что каждый слышит то, что хочет слышать, к чему готов или не готов услышать, даже если информация одинаковая."
+            },
+            {
+                type: "multiple",
+                question: "Что влияет на то, как человек воспринимает информацию?",
+                options: [
+                    "Только громкость голоса говорящего",
+                    "То, что человек хочет и готов услышать",
+                    "Только образование слушателя",
+                    "Время суток"
+                ],
+                correct: 1,
+                explanation: "Каждый слышит то, что слышит, то, что хочет слышать, то, к чему готов услышать или не готов услышать."
+            },
+            {
+                type: "multiple",
+                question: "Согласно тексту, что может вызывать внутреннее волнение и беспокойство?",
+                options: [
+                    "Только опасные ситуации",
+                    "Всё, что не входит в жёсткие рамки нашего социума",
+                    "Исключительно финансовые проблемы",
+                    "Только конфликты с людьми"
+                ],
+                correct: 1,
+                explanation: "Безусловно, всё, что не входит в какие-то жёсткие рамки нашего социума, может вызывать внутри волнение, беспокойство."
+            },
+            {
+                type: "true-false",
+                question: "Говорящий может контролировать, как именно его слова будут восприняты каждым слушателем.",
+                correct: false,
+                explanation: "Текст показывает, что даже если человек говорит одно и то же разным людям, каждый воспринимает это по-своему, в зависимости от своей готовности и желания услышать."
+            },
+            {
+                type: "multiple",
+                question: "Как связаны самовосприятие и восприятие своих возможностей?",
+                options: [
+                    "Никак не связаны",
+                    "От того, как вы смотрите на себя, зависит, как вы себя чувствуете",
+                    "Восприятие возможностей не зависит от самооценки",
+                    "Это противоположные понятия"
+                ],
+                correct: 1,
+                explanation: "То, как вы смотрите на себя и на свои скиллы, навыки, возможности достижения, от этого зависит, как вы себя в этом чувствуете."
+            },
+            {
+                type: "multiple",
+                question: "Что происходит, когда два человека слушают одну и ту же информацию?",
+                options: [
+                    "Они обязательно придут к одному выводу",
+                    "Один может найти это интересным, другой - ересью",
+                    "Они всегда соглашаются друг с другом",
+                    "Информация меняется для каждого"
+                ],
+                correct: 1,
+                explanation: "Кто-то будет слушать и говорить 'как интересно, как здорово', а кто-то будет слушать и говорить 'какую ересь она несёт'."
+            },
+            {
+                type: "true-false",
+                question: "Наше восприятие себя влияет на то, как мы чувствуем себя в различных ситуациях.",
+                correct: true,
+                explanation: "Текст прямо указывает, что от того, как вы смотрите на себя и свои возможности, зависит, как вы себя в этом чувствуете."
+            },
+            {
+                type: "multiple",
+                question: "Что остаётся неизменным независимо от восприятия слушателей?",
+                options: [
+                    "Реакция аудитории",
+                    "То, что говорит спикер",
+                    "Эмоциональный отклик",
+                    "Понимание сообщения"
+                ],
+                correct: 1,
+                explanation: "Я говорю одно и то же этим двум людям - информация остаётся той же, но восприятие различается."
+            },
+            {
+                type: "true-false",
+                question: "Социальные рамки и нормы не влияют на наше внутреннее состояние.",
+                correct: false,
+                explanation: "Текст указывает, что всё, что не входит в жёсткие рамки социума, может вызывать внутреннее волнение и беспокойство."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function startQuiz() {
+            document.querySelector('.start-screen').classList.remove('active');
+            document.querySelector('.quiz-screen').classList.add('active');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            answered = false;
+            const question = questions[currentQuestion];
+            
+            // Update progress
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `Вопрос ${currentQuestion + 1} из ${questions.length}`;
+            
+            // Set question type label
+            document.getElementById('questionType').textContent = 
+                question.type === 'multiple' ? 'Выберите ответ' : 'Правда или ложь';
+            
+            // Set question text
+            document.getElementById('questionText').textContent = question.question;
+            
+            // Create answer area based on question type
+            const answerArea = document.getElementById('answerArea');
+            answerArea.innerHTML = '';
+            
+            if (question.type === 'multiple') {
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'options';
+                
+                question.options.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    optionDiv.textContent = option;
+                    optionDiv.onclick = () => selectMultipleChoice(index);
+                    optionsDiv.appendChild(optionDiv);
+                });
+                
+                answerArea.appendChild(optionsDiv);
+            } else {
+                const trueFalseDiv = document.createElement('div');
+                trueFalseDiv.className = 'true-false-container';
+                
+                const trueBtn = document.createElement('button');
+                trueBtn.className = 'true-false-btn';
+                trueBtn.textContent = '✓ Правда';
+                trueBtn.onclick = () => selectTrueFalse(true);
+                
+                const falseBtn = document.createElement('button');
+                falseBtn.className = 'true-false-btn';
+                falseBtn.textContent = '✗ Ложь';
+                falseBtn.onclick = () => selectTrueFalse(false);
+                
+                trueFalseDiv.appendChild(trueBtn);
+                trueFalseDiv.appendChild(falseBtn);
+                answerArea.appendChild(trueFalseDiv);
+            }
+            
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('explanation').classList.remove('show');
+        }
+
+        function selectMultipleChoice(index) {
+            if (answered) return;
+            answered = true;
+            
+            const options = document.querySelectorAll('.option');
+            const question = questions[currentQuestion];
+            
+            options[index].classList.add('selected');
+            
+            setTimeout(() => {
+                if (index === question.correct) {
+                    options[index].classList.add('correct');
+                    score++;
+                } else {
+                    options[index].classList.add('incorrect');
+                    options[question.correct].classList.add('correct');
+                }
+                
+                showExplanation();
+            }, 500);
+        }
+
+        function selectTrueFalse(answer) {
+            if (answered) return;
+            answered = true;
+            
+            const buttons = document.querySelectorAll('.true-false-btn');
+            const question = questions[currentQuestion];
+            const selectedBtn = answer ? buttons[0] : buttons[1];
+            
+            selectedBtn.classList.add('selected');
+            
+            setTimeout(() => {
+                if (answer === question.correct) {
+                    selectedBtn.classList.add('correct');
+                    score++;
+                } else {
+                    selectedBtn.classList.add('incorrect');
+                    const correctBtn = question.correct ? buttons[0] : buttons[1];
+                    correctBtn.classList.add('correct');
+                }
+                
+                showExplanation();
+            }, 500);
+        }
+
+        function showExplanation() {
+            const question = questions[currentQuestion];
+            const explanationDiv = document.getElementById('explanation');
+            explanationDiv.innerHTML = `<strong>💡 Пояснение:</strong> ${question.explanation}`;
+            explanationDiv.classList.add('show');
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.querySelector('.quiz-screen').classList.remove('active');
+            document.querySelector('.result-screen').classList.add('active');
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            document.getElementById('finalScore').textContent = `${score}/${questions.length}`;
+            
+            let emoji, feedback;
+            if (percentage >= 90) {
+                emoji = '🌟';
+                feedback = 'Превосходно! Вы глубоко понимаете природу восприятия и то, как наш взгляд формирует реальность.';
+            } else if (percentage >= 70) {
+                emoji = '💫';
+                feedback = 'Отличный результат! У вас хорошее понимание того, как восприятие влияет на наш опыт.';
+            } else if (percentage >= 50) {
+                emoji = '🔍';
+                feedback = 'Неплохо! Вы на пути к пониманию того, как наше восприятие создаёт нашу реальность.';
+            } else {
+                emoji = '🌱';
+                feedback = 'Есть пространство для роста! Помните: то, как мы смотрим на мир, определяет то, что мы в нём видим.';
+            }
+            
+            document.getElementById('resultEmoji').textContent = emoji;
+            document.getElementById('feedback').textContent = feedback;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            document.querySelector('.result-screen').classList.remove('active');
+            document.querySelector('.start-screen').classList.add('active');
+        }
+    </script>
+</body>
+</html>

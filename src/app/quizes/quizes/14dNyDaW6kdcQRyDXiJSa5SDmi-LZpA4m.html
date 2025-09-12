@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Этапы отношений - Викторина</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #e91e63 0%, #f06292 50%, #ff4081 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .quiz-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #e91e63;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .question-card {
+            background: #fce4ec;
+            border: 2px solid #f8bbd9;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .question-card.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .question {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .option:hover {
+            border-color: #e91e63;
+            background: #fce4ec;
+            transform: translateX(5px);
+        }
+        
+        .option.selected {
+            border-color: #e91e63;
+            background: #e91e63;
+            color: white;
+        }
+        
+        .option.correct {
+            border-color: #4caf50;
+            background: #4caf50;
+            color: white;
+        }
+        
+        .option.incorrect {
+            border-color: #f44336;
+            background: #f44336;
+            color: white;
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+            line-height: 1.6;
+        }
+        
+        .feedback.correct {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+        
+        .feedback.incorrect {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #f44336;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e91e63, #f06292);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            background: #e91e63;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #d81b60;
+            transform: translateY(-2px);
+        }
+        
+        .btn:disabled {
+            background: #bdbdbd;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .score-display {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #e91e63;
+            margin: 15px 0;
+        }
+        
+        .results {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .results h2 {
+            color: #e91e63;
+            margin-bottom: 20px;
+        }
+        
+        .final-score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+        }
+        
+        .restart-btn {
+            background: #ff4081;
+            margin-top: 20px;
+        }
+        
+        .restart-btn:hover {
+            background: #f50057;
+        }
+        
+        .question-number {
+            color: #e91e63;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1>Этапы отношений</h1>
+            <p>Тест на основе лекции о семи этапах отношений и партнерских ожиданиях</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+        
+        <div class="score-display">
+            Счет: <span id="score">0</span> из <span id="total">0</span>
+        </div>
+        
+        <div id="quiz-content">
+            <!-- Questions will be inserted here -->
+        </div>
+        
+        <div class="controls">
+            <button class="btn" id="prevBtn" onclick="previousQuestion()">← Назад</button>
+            <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Далее →</button>
+        </div>
+        
+        <div class="results" id="results">
+            <h2>Результаты теста</h2>
+            <div class="final-score" id="finalScore"></div>
+            <p id="resultMessage"></p>
+            <button class="btn restart-btn" onclick="restartQuiz()">Пройти заново</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Что показал опрос о том, что больше всего привлекает людей в партнере в последнее время?",
+                options: [
+                    "Юмор и внешность стали главными критериями",
+                    "Забота и внимание набрали максимальное количество голосов",
+                    "Финансы и статус вышли на первое место",
+                    "Ум и интеллект стали приоритетом"
+                ],
+                correct: 1,
+                explanation: "Лектор отмечает, что в опросе победили 'забота и внимание', что говорит о повышенной тревожности людей и желании чувствовать близость в условиях современного мира."
+            },
+            {
+                question: "Сколько основных этапов отношений существует согласно лектору?",
+                options: [
+                    "Пять этапов от знакомства до любви",
+                    "Семь этапов, но большинство пар не доходит до третьего",
+                    "Три основных этапа развития отношений",
+                    "Десять этапов постепенного углубления близости"
+                ],
+                correct: 1,
+                explanation: "Лектор четко говорит о семи этапах отношений и подчеркивает, что 'большинство пар не доходит до третьего этапа, а их семь'."
+            },
+            {
+                question: "Сколько длится первый этап - влюбленность?",
+                options: [
+                    "От шести месяцев до года",
+                    "Примерно три-пять месяцев",
+                    "Может длиться несколько лет",
+                    "Зависит от совместимости партнеров"
+                ],
+                correct: 1,
+                explanation: "Автор объясняет: 'влюбленность, она не так долго живет, как правило, она где-то до трех месяцев' и может продлиться до 'четыре, ну, пять месяцев'."
+            },
+            {
+                question: "Что характеризует второй этап отношений?",
+                options: [
+                    "Углубление романтических чувств",
+                    "Состояние насыщения и пресыщения друг другом",
+                    "Планирование совместного будущего",
+                    "Начало серьезных конфликтов"
+                ],
+                correct: 1,
+                explanation: "Второй этап характеризуется 'состоянием некого насыщения друг другом, пересыщения, присыщения', когда люди начинают хотеть проводить время отдельно."
+            },
+            {
+                question: "Почему третий этап называется 'отвращение'?",
+                options: [
+                    "Партнеры начинают физически отталкиваться друг от друга",
+                    "Это самый сложный период, когда люди ярко замечают недостатки партнера",
+                    "Происходит полная потеря интереса к отношениям",
+                    "Начинается борьба за доминирование в паре"
+                ],
+                correct: 1,
+                explanation: "Лектор описывает третий этап как 'самый-самый сложный период', когда 'люди начинают вдруг ярко замечать недостатки' и 'испытывать недовольство в партнёре'."
+            },
+            {
+                question: "Что происходит на четвертом этапе - 'смирение'?",
+                options: [
+                    "Партнеры сдаются и перестают работать над отношениями",
+                    "Появляется понимание и принятие того, каковы партнер и отношения на самом деле",
+                    "Один из партнеров берет полный контроль над отношениями",
+                    "Начинается поиск компромиссов по всем вопросам"
+                ],
+                correct: 1,
+                explanation: "На этапе смирения 'появляется момент понимания, что мой партнер таков, я в отношениях такова, отношения наши будут такими. И они другими не будут'."
+            },
+            {
+                question: "В чем особенность пятого этапа - 'служение'?",
+                options: [
+                    "Один партнер полностью подчиняется другому",
+                    "Желание делать хорошо партнеру без ожидания чего-то взамен",
+                    "Партнеры начинают служить общим целям",
+                    "Появляется религиозный аспект в отношениях"
+                ],
+                correct: 1,
+                explanation: "Лектор объясняет служение как состояние, когда 'я могу сделать человеку хорошо, не ожидая ничего взамен' и 'хочется просто дать'."
+            },
+            {
+                question: "Какая опасность может возникнуть на шестом этапе - 'дружба'?",
+                options: [
+                    "Партнеры становятся слишком близкими друзьями",
+                    "Могут потеряться сексуальные отношения и романтика",
+                    "Появляется конкуренция между партнерами",
+                    "Отношения становятся слишком предсказуемыми"
+                ],
+                correct: 1,
+                explanation: "Автор предупреждает, что на этапе дружбы 'люди могут потерять сексуальные отношения' и превратиться в друзей, но 'перестают быть партнёрами'."
+            },
+            {
+                question: "Что характеризует седьмой этап - 'любовь'?",
+                options: [
+                    "Возвращение к состоянию влюбленности",
+                    "Сохранение индивидуальности при духовном единстве",
+                    "Полное слияние личностей партнеров",
+                    "Достижение идеальных отношений без проблем"
+                ],
+                correct: 1,
+                explanation: "На этапе любви 'люди сохраняют свою индивидуальность и чувствуют некое духовное единство' и понимают, что отсутствие 'бабочек' не означает необходимость расставания."
+            },
+            {
+                question: "Что говорит лектор о ситуации, когда родитель начинает отношения с новым партнером, который настраивает против взрослых детей?",
+                options: [
+                    "Нужно активно бороться за внимание родителя",
+                    "Лучше отойти в сторону и дать родителю построить новую систему семьи",
+                    "Следует обратиться к семейному психологу",
+                    "Необходимо поставить ультиматум родителю"
+                ],
+                correct: 1,
+                explanation: "Лектор рекомендует 'отойти в сторону и дать папе построить свою систему семьи на своей территории со своей женщиной', поскольку 'взрослые дети – это уже отдельная система'."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function initQuiz() {
+            document.getElementById('total').textContent = questions.length;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const quizContent = document.getElementById('quiz-content');
+            const question = questions[currentQuestion];
+            
+            quizContent.innerHTML = `
+                <div class="question-card active">
+                    <div class="question-number">Вопрос ${currentQuestion + 1} из ${questions.length}</div>
+                    <div class="question">${question.question}</div>
+                    <div class="options">
+                        ${question.options.map((option, index) => 
+                            `<div class="option" onclick="selectOption(${index})" data-index="${index}">
+                                ${option}
+                            </div>`
+                        ).join('')}
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                </div>
+            `;
+            
+            updateProgress();
+            updateButtons();
+            answered = false;
+        }
+
+        function selectOption(selectedIndex) {
+            if (answered) return;
+            
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+                option.style.cursor = 'default';
+            });
+            
+            if (selectedIndex === question.correct) {
+                score++;
+                feedback.className = 'feedback correct';
+                feedback.textContent = `Правильно! ${question.explanation}`;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = `Неправильно. ${question.explanation}`;
+            }
+            
+            feedback.style.display = 'block';
+            document.getElementById('score').textContent = score;
+            document.getElementById('nextBtn').disabled = false;
+            answered = true;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').textContent = currentQuestion === questions.length - 1 ? 'Завершить' : 'Далее →';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-content').style.display = 'none';
+            document.querySelector('.controls').style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'none';
+            document.querySelector('.score-display').style.display = 'none';
+            
+            const results = document.getElementById('results');
+            const percentage = Math.round((score / questions.length) * 100);
+            
+            let message = '';
+            if (percentage >= 80) {
+                message = 'Отлично! Вы хорошо понимаете семь этапов отношений и психологию партнерских взаимодействий.';
+            } else if (percentage >= 60) {
+                message = 'Хорошо! У вас есть базовое понимание этапов отношений. Эти знания помогут лучше понимать динамику ваших отношений.';
+            } else {
+                message = 'Рекомендуем внимательнее изучить материал о этапах отношений - это поможет строить более осознанные и зрелые отношения.';
+            }
+            
+            document.getElementById('finalScore').textContent = `${score} из ${questions.length} (${percentage}%)`;
+            document.getElementById('resultMessage').textContent = message;
+            
+            results.style.display = 'block';
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answered = false;
+            
+            document.getElementById('quiz-content').style.display = 'block';
+            document.querySelector('.controls').style.display = 'flex';
+            document.querySelector('.progress-bar').style.display = 'block';
+            document.querySelector('.score-display').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            document.getElementById('score').textContent = '0';
+            initQuiz();
+        }
+
+        // Initialize quiz when page loads
+        initQuiz();
+    </script>
+</body>
+</html>
