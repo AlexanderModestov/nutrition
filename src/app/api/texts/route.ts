@@ -5,8 +5,8 @@ import { promises as fs } from 'fs';
 
 export async function GET() {
   try {
-    // Get text metadata from local JSON file
-    const configPath = path.join(process.cwd(), 'public', 'configs', 'text_descriptions.json');
+    // Get text metadata from PDF descriptions JSON file
+    const configPath = path.join(process.cwd(), 'public', 'configs', 'pdf_descriptions.json');
     const configContent = await fs.readFile(configPath, 'utf8');
     const localTextData = JSON.parse(configContent);
 

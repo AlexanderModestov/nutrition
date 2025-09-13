@@ -209,7 +209,7 @@ export default function MaterialDetailPage() {
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Materials
+            На Главную
           </Link>
         </div>
 
@@ -237,7 +237,7 @@ export default function MaterialDetailPage() {
               ) : (
                 <ChevronDown className="h-4 w-4 mr-2" />
               )}
-              {showFullDescription ? "Show" : "Show"} {showFullDescription ? "short" : "full"} description
+              {showFullDescription ? "Краткое описание" : "Полное описание"}
             </button>
           </div>
 
@@ -388,21 +388,6 @@ export default function MaterialDetailPage() {
             </div>
           )}
 
-          {/* Meta Information */}
-          <div className="flex flex-wrap gap-6 text-sm text-muted-foreground mt-8 pt-6 border-t border-border">
-            <div className="flex items-center">
-              <User className="h-4 w-4 mr-2" />
-              {material.author}
-            </div>
-            <div className="flex items-center">
-              <Calendar className="h-4 w-4 mr-2" />
-              {new Date(material.createdAt).toLocaleDateString()}
-            </div>
-            <div className="flex items-center">
-              <Tag className="h-4 w-4 mr-2" />
-              {material.type}
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -6,6 +6,9 @@ export interface TextFile {
   title: string;
   content: string;
   filename: string;
+  originalKey?: string;
+  shortDescription?: string;
+  longDescription?: string;
 }
 
 export function generateSlug(title: string): string {
@@ -71,7 +74,7 @@ export async function getTextFileBySlug(slug: string): Promise<TextFile | null> 
     // Try to use the Google Drive service directly if we're on the server
     if (typeof window === 'undefined') {
       const { googleDriveService } = await import('@/lib/google-drive');
-      const configPath = path.join(process.cwd(), 'public', 'configs', 'text_descriptions.json');
+      const configPath = path.join(process.cwd(), 'public', 'configs', 'pdf_descriptions.json');
       
       if (!fs.existsSync(configPath)) {
         return null;
@@ -114,7 +117,10 @@ export async function getTextFileBySlug(slug: string): Promise<TextFile | null> 
         slug,
         title: textConfig.name,
         content: driveText ? driveText.content.text : '',
-        filename: textTitle + '.txt'
+        filename: textTitle + '.txt',
+        originalKey: textTitle,
+        shortDescription: textConfig.short_description,
+        longDescription: textConfig.long_description
       };
     } else {
       // Client-side: fetch from API
@@ -141,7 +147,10 @@ export async function getTextFileBySlug(slug: string): Promise<TextFile | null> 
         slug,
         title: textConfig.name,
         content: textConfig.content || '',
-        filename: textTitle + '.txt'
+        filename: textTitle + '.txt',
+        originalKey: textTitle,
+        shortDescription: textConfig.short_description,
+        longDescription: textConfig.long_description
       };
     }
   } catch (error) {

@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { ChevronLeft, FileText } from 'lucide-react';
 import { getTextFileBySlug, formatTextContent, generateSlug } from '@/lib/text-utils';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import path from 'path';
+import fs from 'fs';
+import { TextPageClient } from './text-page-client';
 
 interface TextPageProps {
   params: {
@@ -16,7 +15,7 @@ export async function generateStaticParams() {
     const fs = require('fs');
     const path = require('path');
     
-    const configPath = path.join(process.cwd(), 'public', 'configs', 'text_descriptions.json');
+    const configPath = path.join(process.cwd(), 'public', 'configs', 'pdf_descriptions.json');
     if (!fs.existsSync(configPath)) {
       return [];
     }
@@ -32,18 +31,51 @@ export async function generateStaticParams() {
   }
 }
 
+// Function to find PDF file by matching article key
+function findPdfFile(articleKey: string): string | null {
+  const pdfDir = path.join(process.cwd(), 'public', 'data', 'pdf');
+  
+  if (!fs.existsSync(pdfDir)) {
+    return null;
+  }
+  
+  const pdfFiles = fs.readdirSync(pdfDir).filter(file => file.endsWith('.pdf'));
+  
+  // Try exact match first
+  const exactMatch = pdfFiles.find(file => 
+    file.replace('.pdf', '') === articleKey
+  );
+  
+  if (exactMatch) {
+    return `/data/pdf/${exactMatch}`;
+  }
+  
+  // Try partial match
+  const partialMatch = pdfFiles.find(file => {
+    const fileName = file.replace('.pdf', '').toLowerCase();
+    const searchKey = articleKey.toLowerCase();
+    return fileName.includes(searchKey.substring(0, 10)) || searchKey.includes(fileName.substring(0, 10));
+  });
+  
+  if (partialMatch) {
+    return `/data/pdf/${partialMatch}`;
+  }
+  
+  return null;
+}
+
 export async function generateMetadata({ params }: TextPageProps) {
   const textFile = await getTextFileBySlug(params.slug);
   
   if (!textFile) {
     return {
-      title: 'Text Not Found',
+      title: 'Article Not Found',
     };
   }
 
   return {
     title: textFile.title,
-    description: textFile.content.slice(0, 160) + '...',
+    description: textFile.shortDescription || textFile.content.slice(0, 160) + '...',
   };
 }
 
@@ -54,92 +86,8 @@ export default async function TextPage({ params }: TextPageProps) {
     notFound();
   }
 
-  const formattedContent = formatTextContent(textFile.content);
-  const paragraphs = formattedContent.split('\n\n');
+  // Find the corresponding PDF file
+  const pdfPath = findPdfFile(textFile.originalKey || textFile.title);
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb Navigation */}
-        <div className="mb-8">
-          <Button variant="ghost" asChild className="mb-4">
-            <Link href="/texts" className="flex items-center gap-2">
-              <ChevronLeft className="h-4 w-4" />
-              Back to Texts
-            </Link>
-          </Button>
-          
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-foreground">Home</Link>
-            <span>/</span>
-            <Link href="/texts" className="hover:text-foreground">Texts</Link>
-            <span>/</span>
-            <span className="text-foreground">{textFile.title}</span>
-          </div>
-        </div>
-
-        {/* Article Header */}
-        <Card className="mb-8">
-          <CardContent className="pt-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <FileText className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-            <h1 className="text-3xl font-bold mb-4">{textFile.title}</h1>
-          </CardContent>
-        </Card>
-
-        {/* Article Content */}
-        <Card>
-          <CardContent className="pt-8">
-            <article className="prose prose-lg dark:prose-invert max-w-none">
-              {paragraphs.map((paragraph, index) => {
-                // Check if this is the first paragraph (title) - skip it since it's already shown in header
-                if (index === 0 && paragraph.trim() === textFile.title) {
-                  return null;
-                }
-                
-                // Check if paragraph looks like a heading (short and ends without punctuation)
-                const isHeading = paragraph.length < 100 && 
-                  !paragraph.endsWith('.') && 
-                  !paragraph.endsWith('?') && 
-                  !paragraph.endsWith('!') &&
-                  paragraph.split(' ').length < 15;
-                
-                if (isHeading) {
-                  return (
-                    <h2 key={index} className="text-xl font-semibold mt-8 mb-4 text-primary">
-                      {paragraph}
-                    </h2>
-                  );
-                }
-                
-                return (
-                  <p key={index} className="mb-4 leading-relaxed text-foreground">
-                    {paragraph}
-                  </p>
-                );
-              })}
-            </article>
-            
-            {/* Article Footer */}
-            <div className="mt-12 pt-8 border-t">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="text-sm text-muted-foreground">
-                  <div className="font-medium">Expert Knowledge Hub</div>
-                  <div>Professional Psychology Content</div>
-                </div>
-                <Button variant="outline" asChild>
-                  <Link href="/texts">
-                    View All Texts
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+  return <TextPageClient textFile={textFile} pdfPath={pdfPath} />;
 }

@@ -76,9 +76,6 @@ const MaterialCard = ({ material }: MaterialCardProps) => {
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             {getIcon()}
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              {material.type}
-            </span>
           </div>
           {material.content?.difficulty && (
             <span
@@ -115,18 +112,7 @@ const MaterialCard = ({ material }: MaterialCardProps) => {
           )}
         </div>
 
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <User className="h-4 w-4" />
-              <span>{material.author}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span>{new Date(material.createdAt).toLocaleDateString()}</span>
-            </div>
-          </div>
-          
+        <div className="flex items-center justify-end text-sm text-muted-foreground">
           {(material.content?.duration || material.content?.readTime) && (
             <div className="flex items-center gap-1">
               <Clock className="h-4 w-4" />
