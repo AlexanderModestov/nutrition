@@ -29,7 +29,6 @@ export default function VideosPage() {
         const transformVideos = (data: any) => {
           if (data.videos) {
             return Object.entries(data.videos)
-              .filter(([_, video]: [string, any]) => video.url) // Only show videos with Google Drive URLs
               .map(([id, video]: [string, any]) => ({
                 id,
                 title: video.name,
@@ -80,17 +79,6 @@ export default function VideosPage() {
           description="Экспертные уроки, лекции и образовательные видео"
         />
 
-        <div className="mt-20 text-center fade-in">
-          <div className="knowledge-card inline-block">
-            <div className="flex items-center gap-4">
-              <div className="text-3xl font-bold text-primary">{videos.length}</div>
-              <div className="text-left">
-                <div className="font-semibold text-foreground">Video Resources</div>
-                <div className="text-sm text-muted-foreground">Educational content</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </main>
     </div>
   );
