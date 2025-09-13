@@ -79,17 +79,6 @@ export default function TextsPage() {
           description="Углубленные статьи, руководства и документация"
         />
 
-        <div className="mt-20 text-center fade-in">
-          <div className="knowledge-card inline-block">
-            <div className="flex items-center gap-4">
-              <div className="text-3xl font-bold text-primary">{texts.length}</div>
-              <div className="text-left">
-                <div className="font-semibold text-foreground">Text Resources</div>
-                <div className="text-sm text-muted-foreground">Written content</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </main>
     </div>
   );
