@@ -16,9 +16,9 @@ export function TextPageClient({ textFile, pdfPath }: TextPageClientProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Breadcrumb Navigation */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Button variant="ghost" asChild className="mb-4">
             <Link href="/" className="flex items-center gap-2">
               <ChevronLeft className="h-4 w-4" />
@@ -26,38 +26,38 @@ export function TextPageClient({ textFile, pdfPath }: TextPageClientProps) {
             </Link>
           </Button>
           
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <Link href="/" className="hover:text-foreground">Home</Link>
             <span>/</span>
             <span className="text-foreground">Статьи автора</span>
             <span>/</span>
-            <span className="text-foreground">{textFile.title}</span>
+            <span className="text-foreground line-clamp-1">{textFile.title}</span>
           </div>
         </div>
 
         {/* Article Header */}
-        <Card className="mb-8">
-          <CardContent className="pt-8">
-            <div className="flex items-center justify-between mb-6">
+        <Card className="mb-6 sm:mb-8">
+          <CardContent className="pt-6 sm:pt-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg">
                   <FileText className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold">{textFile.title}</h1>
+                  <h1 className="text-2xl sm:text-3xl font-bold">{textFile.title}</h1>
                 </div>
               </div>
               
               {pdfPath && (
-                <div className="flex gap-2">
-                  <Button variant="outline" asChild>
-                    <a href={pdfPath} download className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <Button variant="outline" asChild className="w-full sm:w-auto">
+                    <a href={pdfPath} download className="flex items-center justify-center gap-2">
                       <Download className="h-4 w-4" />
                       Скачать
                     </a>
                   </Button>
-                  <Button variant="outline" asChild>
-                    <a href={pdfPath} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                  <Button variant="outline" asChild className="w-full sm:w-auto">
+                    <a href={pdfPath} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                       <ExternalLink className="h-4 w-4" />
                       Открыть в новой вкладке
                     </a>
@@ -99,7 +99,8 @@ export function TextPageClient({ textFile, pdfPath }: TextPageClientProps) {
         {pdfPath ? (
           <Card>
             <CardContent className="p-0">
-              <div className="w-full" style={{ height: '80vh' }}>
+              {/* Desktop PDF Viewer */}
+              <div className="hidden sm:block w-full" style={{ height: '80vh' }}>
                 <iframe
                   src={pdfPath}
                   className="w-full h-full border-0 rounded-lg"
@@ -117,6 +118,29 @@ export function TextPageClient({ textFile, pdfPath }: TextPageClientProps) {
                     </Button>
                   </div>
                 </iframe>
+              </div>
+              
+              {/* Mobile PDF Fallback */}
+              <div className="sm:hidden p-8 text-center">
+                <FileText className="h-16 w-16 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">PDF Document</h3>
+                <p className="text-muted-foreground mb-6">
+                  На мобильных устройствах PDF лучше просматривать в отдельном приложении.
+                </p>
+                <div className="space-y-3">
+                  <Button asChild className="w-full">
+                    <a href={pdfPath} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Открыть PDF
+                    </a>
+                  </Button>
+                  <Button variant="outline" asChild className="w-full">
+                    <a href={pdfPath} download>
+                      <Download className="h-4 w-4 mr-2" />
+                      Скачать PDF
+                    </a>
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
