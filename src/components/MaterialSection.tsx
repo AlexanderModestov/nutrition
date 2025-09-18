@@ -54,21 +54,21 @@ const MaterialSection = ({ title, type, materials, icon, description }: Material
   };
 
   return (
-    <div className="mb-12">
-      <div className="flex items-center justify-between mb-6">
+    <div className="mb-8 sm:mb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
         <div className="flex items-center gap-3">
-          <div className={`p-3 rounded-lg ${getTypeBackground()}`}>
+          <div className={`p-2 sm:p-3 rounded-lg ${getTypeBackground()}`}>
             <div className={getTypeColor()}>{icon}</div>
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-foreground">{title}</h2>
-            <p className="text-muted-foreground mt-1">{description}</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">{title}</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">{description}</p>
           </div>
         </div>
         
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary"
+          className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary self-start sm:self-auto"
         >
           {isExpanded ? (
             <>
@@ -85,7 +85,7 @@ const MaterialSection = ({ title, type, materials, icon, description }: Material
       </div>
 
       {isExpanded && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 fade-in">
           {materials.map((material, index) => (
             <div key={material.id} className="slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
               <MaterialCard material={material} />

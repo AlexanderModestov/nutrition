@@ -88,15 +88,15 @@ const MaterialCard = ({ material }: MaterialCardProps) => {
           )}
         </div>
 
-        <h3 className="text-xl font-semibold text-card-foreground mb-2 group-hover:text-primary transition-colors">
+        <h3 className="text-lg sm:text-xl font-semibold text-card-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
           {material.title}
         </h3>
 
-        <p className="text-muted-foreground mb-4 line-clamp-3">
+        <p className="text-sm sm:text-base text-muted-foreground mb-4 line-clamp-3">
           {material.shortDescription}
         </p>
 
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
           {material.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}

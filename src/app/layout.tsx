@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Expert Knowledge Hub",
   description: "A curated collection of expert knowledge materials",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
@@ -17,6 +18,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
       <body className={inter.className}>
         <Providers>
           {children}
