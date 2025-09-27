@@ -102,9 +102,10 @@ export function TextPageClient({ textFile, pdfPath }: TextPageClientProps) {
               {/* Desktop PDF Viewer */}
               <div className="hidden sm:block w-full" style={{ height: '80vh' }}>
                 <iframe
-                  src={pdfPath}
+                  src={`${pdfPath}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
                   className="w-full h-full border-0 rounded-lg"
                   title={textFile.title}
+                  loading="lazy"
                 >
                   <div className="p-8 text-center">
                     <p className="text-muted-foreground mb-4">
@@ -120,44 +121,26 @@ export function TextPageClient({ textFile, pdfPath }: TextPageClientProps) {
                 </iframe>
               </div>
               
-              {/* Mobile Simplified View */}
-              <div className="sm:hidden">
-                {/* Mobile Content Display */}
-                {textFile.longDescription && (
-                  <div className="p-6 border-b">
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" />
-                      Содержание статьи
-                    </h3>
-                    <div className="prose prose-sm max-w-none">
-                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                        {textFile.longDescription}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Mobile PDF Actions */}
-                <div className="p-6 text-center">
-                  <FileText className="h-12 w-12 text-primary mx-auto mb-3" />
-                  <h4 className="text-md font-medium mb-2">Полная версия PDF</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Для просмотра полной версии откройте PDF файл
-                  </p>
-                  <div className="space-y-2">
-                    <Button asChild className="w-full">
-                      <a href={pdfPath} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Открыть PDF
-                      </a>
-                    </Button>
-                    <Button variant="outline" asChild className="w-full">
-                      <a href={pdfPath} download>
-                        <Download className="h-4 w-4 mr-2" />
-                        Скачать PDF
-                      </a>
-                    </Button>
-                  </div>
+              {/* Mobile PDF Links */}
+              <div className="sm:hidden p-8 text-center">
+                <FileText className="h-16 w-16 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">PDF Document</h3>
+                <p className="text-muted-foreground mb-6">
+                  На мобильных устройствах PDF лучше просматривать в отдельном приложении.
+                </p>
+                <div className="space-y-3">
+                  <Button asChild className="w-full">
+                    <a href={pdfPath} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Открыть PDF
+                    </a>
+                  </Button>
+                  <Button variant="outline" asChild className="w-full">
+                    <a href={pdfPath} download>
+                      <Download className="h-4 w-4 mr-2" />
+                      Скачать PDF
+                    </a>
+                  </Button>
                 </div>
               </div>
             </CardContent>
