@@ -126,22 +126,14 @@ export function TextPageClient({ textFile, pdfPath }: TextPageClientProps) {
                 <FileText className="h-16 w-16 text-primary mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">PDF Document</h3>
                 <p className="text-muted-foreground mb-6">
-                  На мобильных устройствах PDF лучше просматривать в отдельном приложении.
+                  Для просмотра PDF нажмите кнопку ниже
                 </p>
-                <div className="space-y-3">
-                  <Button asChild className="w-full">
-                    <a href={pdfPath} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      Открыть PDF
-                    </a>
-                  </Button>
-                  <Button variant="outline" asChild className="w-full">
-                    <a href={pdfPath} download>
-                      <Download className="h-4 w-4 mr-2" />
-                      Скачать PDF
-                    </a>
-                  </Button>
-                </div>
+                <Button asChild className="w-full">
+                  <a href={pdfPath} target="_blank" rel="noopener noreferrer">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Открыть PDF
+                  </a>
+                </Button>
               </div>
             </CardContent>
           </Card>
