@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft, FileText, Download, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronLeft, FileText, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useState } from 'react';
+import { PDFViewer } from '@/components/PDFViewer';
 
 interface TextPageClientProps {
   textFile: any;
@@ -47,23 +48,6 @@ export function TextPageClient({ textFile, pdfPath }: TextPageClientProps) {
                   <h1 className="text-2xl sm:text-3xl font-bold">{textFile.title}</h1>
                 </div>
               </div>
-              
-              {pdfPath && (
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  <Button variant="outline" asChild className="w-full sm:w-auto">
-                    <a href={pdfPath} download className="flex items-center justify-center gap-2">
-                      <Download className="h-4 w-4" />
-                      Скачать
-                    </a>
-                  </Button>
-                  <Button variant="outline" asChild className="w-full sm:w-auto">
-                    <a href={pdfPath} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
-                      <ExternalLink className="h-4 w-4" />
-                      Открыть в новой вкладке
-                    </a>
-                  </Button>
-                </div>
-              )}
             </div>
             
             {/* Article Description with toggle */}
@@ -98,43 +82,8 @@ export function TextPageClient({ textFile, pdfPath }: TextPageClientProps) {
         {/* PDF Viewer */}
         {pdfPath ? (
           <Card>
-            <CardContent className="p-0">
-              {/* Desktop PDF Viewer */}
-              <div className="hidden sm:block w-full" style={{ height: '80vh' }}>
-                <iframe
-                  src={`${pdfPath}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
-                  className="w-full h-full border-0 rounded-lg"
-                  title={textFile.title}
-                  loading="lazy"
-                >
-                  <div className="p-8 text-center">
-                    <p className="text-muted-foreground mb-4">
-                      Your browser doesn't support PDF viewing.
-                    </p>
-                    <Button asChild>
-                      <a href={pdfPath} download>
-                        <Download className="h-4 w-4 mr-2" />
-                        Download PDF
-                      </a>
-                    </Button>
-                  </div>
-                </iframe>
-              </div>
-              
-              {/* Mobile PDF Links */}
-              <div className="sm:hidden p-8 text-center">
-                <FileText className="h-16 w-16 text-primary mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">PDF Document</h3>
-                <p className="text-muted-foreground mb-6">
-                  Для просмотра PDF нажмите кнопку ниже
-                </p>
-                <Button asChild className="w-full">
-                  <a href={pdfPath} target="_blank" rel="noopener noreferrer">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Открыть PDF
-                  </a>
-                </Button>
-              </div>
+            <CardContent className="p-4 sm:p-6">
+              <PDFViewer pdfUrl={pdfPath} title={textFile.title} />
             </CardContent>
           </Card>
         ) : (
