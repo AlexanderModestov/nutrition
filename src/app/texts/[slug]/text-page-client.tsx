@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft, FileText, Download, ExternalLink, ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronLeft, FileText, Download, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useState } from 'react';
@@ -38,32 +38,13 @@ export function TextPageClient({ textFile, pdfPath }: TextPageClientProps) {
         {/* Article Header */}
         <Card className="mb-6 sm:mb-8">
           <CardContent className="pt-6 sm:pt-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <FileText className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold">{textFile.title}</h1>
-                </div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <FileText className="h-6 w-6 text-primary" />
               </div>
-              
-              {pdfPath && (
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  <Button variant="outline" asChild className="w-full sm:w-auto">
-                    <a href={pdfPath} download className="flex items-center justify-center gap-2">
-                      <Download className="h-4 w-4" />
-                      Скачать
-                    </a>
-                  </Button>
-                  <Button variant="outline" asChild className="w-full sm:w-auto">
-                    <a href={pdfPath} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
-                      <ExternalLink className="h-4 w-4" />
-                      Открыть в новой вкладке
-                    </a>
-                  </Button>
-                </div>
-              )}
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold">{textFile.title}</h1>
+              </div>
             </div>
             
             {/* Article Description with toggle */}
