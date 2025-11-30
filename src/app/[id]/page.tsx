@@ -310,7 +310,7 @@ export default function MaterialDetailPage() {
                             controls
                             className="w-full h-auto rounded-lg"
                             preload="metadata"
-                            style={{ maxHeight: '70vh' }}
+                            style={{ maxHeight: '72vh' }}
                             onLoadStart={() => setVideoLoading(true)}
                             onLoadedMetadata={() => setVideoLoading(false)}
                             onCanPlay={() => setVideoLoading(false)}
@@ -320,7 +320,7 @@ export default function MaterialDetailPage() {
                           </video>
                         </div>
                       ) : (
-                        <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                        <div className="max-w-4xl mx-auto aspect-video bg-black rounded-lg overflow-hidden">
                           <video
                             src={material.content.url}
                             controls
